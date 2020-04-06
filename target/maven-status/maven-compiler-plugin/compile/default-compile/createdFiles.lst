@@ -1,0 +1,10 @@
+src/main/java/setup/TasteOfRiak.class
+src/main/java/documents/Person.class
+src/main/java/read/Csv.class
+src/main/java/documents/Order.class
+src/main/java/documents/Doc.class
+src/main/java/documents/Vendor.class
+src/main/java/documents/Feedback.class
+src/main/java/read/Json.class
+src/main/java/read/Xml.class
+src/main/java/documents/Product.class

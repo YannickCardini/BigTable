@@ -1,0 +1,10 @@
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/setup/TasteOfRiak.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/documents/Feedback.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/documents/Product.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/documents/Vendor.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/documents/Person.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/read/Json.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/documents/Order.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/read/Csv.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/read/Xml.java
+/home/loubard/eclipse-workspace/BigTable/src/src/main/java/documents/Doc.java
