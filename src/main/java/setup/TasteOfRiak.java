@@ -44,32 +44,10 @@ public class TasteOfRiak {
 	public static final String PROJECT_PATH = ToolBox.getProjectDirectoryPath();
 	public static String dataPath;
 	
-	//set up directory data
-	private static boolean setDataDirectory(String name) {
-		File file = new File(String.format("%s%s%s", PROJECT_PATH, ToolBox.SEPARATOR, name));
-		if(!file.exists()) {
-			if(file.mkdir()) {
-				dataPath = file.getAbsolutePath();
-				System.out.println("[INFO] - create data dir : Sucess -> " + dataPath);
-				return true;
-			} else {
-				System.out.println("[ERROR] - create data dir : Fail -> " + dataPath);
-				return false;
-			}
-		} else {
-			dataPath = file.getAbsolutePath();
-			System.out.println("[INFO] - create data dir : already exist");
-			return true;
-		}
-		
-	}
-	
 	//get Data directory
 	private static String getDataDirectory() {
 		return dataPath;
 	}
-	
-	
 	
 	// This will create a client object that we can use to interact with Riak
 	private static RiakCluster setUpCluster() throws UnknownHostException {
@@ -175,35 +153,31 @@ public class TasteOfRiak {
 			RiakClient client = new RiakClient(cluster);
 			System.out.println("Client object successfully created");
 
-			if(setDataDirectory("data")) {
-//				storePerson(PATH + "Customer/person_0_0.csv",client);
-//				storeFeedback(PATH + "Feedback/Feedback.csv",client);
-//				storeProduct(PATH + "Product/Product.csv","/home/loubard/Documents/BD_BigTable/DATA/Product/BrandByProduct.csv",client);
-//				storeVendor(PATH + "Vendor/Vendor.csv",client);
-//				storeInvoice(PATH + "Invoice/Invoice.xml", client);
+//			storePerson(PATH + "Customer/person_0_0.csv",client);
+//			storeFeedback(PATH + "Feedback/Feedback.csv",client);
+//			storeProduct(PATH + "Product/Product.csv","/home/loubard/Documents/BD_BigTable/DATA/Product/BrandByProduct.csv",client);
+//			storeVendor(PATH + "Vendor/Vendor.csv",client);
+//			storeInvoice(PATH + "Invoice/Invoice.xml", client);
 				
-				String orderPath = "Order" + ToolBox.SEPARATOR + "Order.json";
-				File op = ToolBox.getFileIntoRessources(orderPath);
-				
-				storeOrder(op, client);
+			String orderPath = "Order" + ToolBox.SEPARATOR + "Order.json";
+			File op = ToolBox.getFileIntoRessources(orderPath);
+			
+			storeOrder(op, client);
 
 	//
-//				Namespace personsBucket = new Namespace("invoice");
-//				Location personLocation = new Location(personsBucket, "4da0a2a0-770d-479d-b48f-dcfab4a33e7c");
-//				FetchValue fetchMobyDickOp = new FetchValue.Builder(personLocation).build();
-//				Order fetchedBook = client.execute(fetchMobyDickOp).getValue(Order.class);
-//				System.out.println(fetchedBook.getTotalPrice());
-	//
-//				Namespace animalsBucket = new Namespace("invoice");
-//				FetchBucketProperties fetchProps = new FetchBucketProperties.Builder(animalsBucket).build();
-//				Response response = client.execute(fetchProps);
-//				BucketProperties props = response.getBucketProperties();
-//				System.out.println(props);
+//			Namespace personsBucket = new Namespace("invoice");
+//			Location personLocation = new Location(personsBucket, "4da0a2a0-770d-479d-b48f-dcfab4a33e7c");
+//			FetchValue fetchMobyDickOp = new FetchValue.Builder(personLocation).build();
+//			Order fetchedBook = client.execute(fetchMobyDickOp).getValue(Order.class);
+//			System.out.println(fetchedBook.getTotalPrice());
+	////			Namespace animalsBucket = new Namespace("invoice");
+//			FetchBucketProperties fetchProps = new FetchBucketProperties.Builder(animalsBucket).build();
+//			Response response = client.execute(fetchProps);
+//			BucketProperties props = response.getBucketProperties();
+//			System.out.println(props);
 
-				Json json = new Json();
-				json.readOrder(op);
-
-			}
+			Json json = new Json();
+			json.readOrder(op);
 
 			cluster.shutdown();
 
