@@ -2,44 +2,34 @@ package main.java.setup;
 
 
 import com.basho.riak.client.api.RiakClient;
-import com.basho.riak.client.api.commands.buckets.FetchBucketProperties;
-import com.basho.riak.client.api.commands.kv.DeleteValue;
+import com.basho.riak.client.api.cap.Quorum;
 import com.basho.riak.client.api.commands.kv.FetchValue;
 import com.basho.riak.client.api.commands.kv.StoreValue;
 import com.basho.riak.client.api.commands.kv.UpdateValue;
 import com.basho.riak.client.core.RiakCluster;
 import com.basho.riak.client.core.RiakNode;
 import com.basho.riak.client.core.netty.RiakResponseException;
-import com.basho.riak.client.core.operations.FetchBucketPropsOperation.Response;
-import com.basho.riak.client.core.query.BucketProperties;
 import com.basho.riak.client.core.query.Location;
 import com.basho.riak.client.core.query.Namespace;
 import com.basho.riak.client.core.query.RiakObject;
 import com.basho.riak.client.core.util.BinaryValue;
-
-import main.java.documents.Feedback;
-import main.java.documents.Order;
-import main.java.documents.Person;
-import main.java.documents.Product;
-import main.java.documents.Vendor;
+import main.java.documents.*;
 import main.java.read.Csv;
 import main.java.read.Json;
 import main.java.read.Xml;
 import main.java.util.ToolBox;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.text.ParseException;
 import java.util.concurrent.ExecutionException;
 
+import com.basho.riak.client.*;
+
 public class TasteOfRiak {
 	// A basic POJO class to demonstrate typed exchanges with Riak
-	//public static final String PATH = "/home/loubard/Documents/BD_BigTable/DATA/";
+	public static final String PATH = "/home/benoit/Documents/ressources/";
 
 	// TODO : modifier le nom du dossier #YannickMiage
 	public static final String PROJECT_PATH = ToolBox.getProjectDirectoryPath();
@@ -102,19 +92,74 @@ public class TasteOfRiak {
 	}
 
 	private static void storeProduct(String pathToCsv, String pathToCsvByBrand, RiakClient client)
-			throws IOException, ParseException, ExecutionException, InterruptedException {
+			throws IOException, ParseException, InterruptedException {
 		Csv csv = new Csv();
 		csv.readProduct(pathToCsv, pathToCsvByBrand);
 		double csvLength = csv.getProducts().size();
 		double i = 0;
 		for (Product prod : csv.getProducts()) {
-			Namespace personsBucket = new Namespace("product");
-			Location personLocation = new Location(personsBucket, prod.getAsin());
-			StoreValue storePersonOp = new StoreValue.Builder(prod).withLocation(personLocation).build();
-			client.execute(storePersonOp);
-			i++;
-			System.out.println(String.format("%.2f", (i / csvLength) * 100 ) + "%");
+			Namespace personsBucket = new Namespace("product", prod.getAsin());
+			Location personLocation = new Location(personsBucket, "price");
+			RiakObject ro= new RiakObject();
+			ro.setValue(BinaryValue.create(prod.getPrice().toString()));
+System.out.println(prod.getAsin());
+			StoreValue storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
+			try {
+				client.execute(storePersonOp);
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+
+			personsBucket = new Namespace("product", prod.getAsin());
+			personLocation = new Location(personsBucket, "title");
+			ro= new RiakObject();
+			ro.setValue(BinaryValue.create(prod.getTitle()));
+
+			storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
+			try {
+				client.execute(storePersonOp);
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+
+			personsBucket = new Namespace("product", prod.getAsin());
+			personLocation = new Location(personsBucket, "imgUrl");
+			ro= new RiakObject();
+			ro.setValue(BinaryValue.create(prod.getImgUrl()));
+
+			storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
+			try {
+				client.execute(storePersonOp);
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+
+			personsBucket = new Namespace("product", prod.getAsin());
+			personLocation = new Location(personsBucket, "brand");
+			ro= new RiakObject();
+			ro.setValue(BinaryValue.create(prod.getBrand()));
+			storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
+			try {
+				client.execute(storePersonOp);
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+
+	private static void updateProduct(String bucketName, String productKey, String newValue, RiakClient client)
+			throws IOException, ParseException, ExecutionException, InterruptedException {
+		Location productLocation = new Location(new Namespace("product", bucketName), productKey);
+		FetchValue fetch = new FetchValue.Builder(productLocation)
+				.build();
+		FetchValue.Response response = client.execute(fetch);
+		RiakObject obj = response.getValue(RiakObject.class);
+		obj.setValue(BinaryValue.create(newValue));
+		/*UpdateValue updateOp = new UpdateValue.Builder(productLocation)
+				.withUpdate(UpdateValue.Update.clobberUpdate(brandNewUser))
+				.build();
+		client.execute(updateOp);*/
+		System.out.println("Opération de mise à jour réussie");
 	}
 
 	private static void storeVendor(String pathToCsv, RiakClient client)
@@ -140,7 +185,7 @@ public class TasteOfRiak {
 		double xmlLength = xml.getInvoices().size();
 		double i = 0;
 		for (Order inv : xml.getInvoices()) {
-			try {// Object really heavy 
+			try {// Object really heavy
 				Namespace personsBucket = new Namespace("invoice");
 				Location personLocation = new Location(personsBucket, inv.getOrderId());
 				StoreValue storePersonOp = new StoreValue.Builder(inv).withLocation(personLocation).build();
@@ -160,7 +205,7 @@ public class TasteOfRiak {
 		double jsonLength = json.getOrders().size();
 		double i = 0;
 		for (Order jayson : json.getOrders()) {
-			try {// Object really large 
+			try {// Object really large
 				Namespace personsBucket = new Namespace("order");
 				Location personLocation = new Location(personsBucket, "gdsgfg");
 				StoreValue storePersonOp = new StoreValue.Builder(jayson).withLocation(personLocation).build();
@@ -187,6 +232,50 @@ public class TasteOfRiak {
 //			storeInvoice(PATH + "Invoice/Invoice.xml", client);										//
 //			storeOrder(PATH + "Order/Order.json", client);											//
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+//			storePerson(PATH + "Customer/person_0_0.csv",client);
+//			storeFeedback(PATH + "Feedback/Feedback.csv",client);
+
+					//Test d'insertion de tous les Product
+			//String productPath = PROJECT_PATH+"/ressources/Product" + ToolBox.SEPARATOR + "Product.csv";
+			//File op = ToolBox.getFileIntoRessources(productPath);
+
+			//String product2Path = PROJECT_PATH+"/ressources/Product" + ToolBox.SEPARATOR + "BrandByProduct.csv";
+			//File op2 = ToolBox.getFileIntoRessources(product2Path);
+
+			//storeProduct(productPath, product2Path, client);
+
+
+	//
+//			Namespace personsBucket = new Namespace("invoice");
+//			Location personLocation = new Location(personsBucket, "4da0a2a0-770d-479d-b48f-dcfab4a33e7c");
+//			FetchValue fetchMobyDickOp = new FetchValue.Builder(personLocation).build();
+//			Order fetchedBook = client.execute(fetchMobyDickOp).getValue(Order.class);
+//			System.out.println(fetchedBook.getTotalPrice());
+	////			Namespace animalsBucket = new Namespace("invoice");
+//			FetchBucketProperties fetchProps = new FetchBucketProperties.Builder(animalsBucket).build();
+//			Response response = client.execute(fetchProps);
+//			BucketProperties props = response.getBucketProperties();
+//			System.out.println(props);
+
+			/*Json json = new Json();
+			json.readOrder(op);*/
+
+			//Test de modification d'une donnée (à terminer)
+/*Location myKey = new Location(new Namespace("product","2094869245"), "price");
+FetchValue fetch = new FetchValue.Builder(myKey)
+        .build();
+FetchValue.Response response = client.execute(fetch);
+RiakObject obj = response.getValue(RiakObject.class);
+System.out.println("Ancien objet: "+obj.getValue());
+
+updateProduct("2094869245", "title","test",client);
+
+			myKey = new Location(new Namespace("product","2094869245"), "price");
+			fetch = new FetchValue.Builder(myKey)
+					.build();
+			response = client.execute(fetch);
+			obj = response.getValue(RiakObject.class);
+			System.out.println("Nouvel objet: "+obj.getValue());*/
 			cluster.shutdown();
 
 		} catch (Exception e) {
