@@ -148,7 +148,6 @@ public class Csv {
 			String[] data = row.split("\\|");
 			persons.add(parseStringToPersonList(data));
 		}
-
 		csvReader.close();
 	}
 	

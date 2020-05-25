@@ -1,5 +1,6 @@
 package src.main.java.setup;
 
+
 import com.basho.riak.client.api.RiakClient;
 import com.basho.riak.client.api.commands.buckets.FetchBucketProperties;
 import com.basho.riak.client.api.commands.kv.DeleteValue;
@@ -39,7 +40,7 @@ public class TasteOfRiak {
 	// This will create a client object that we can use to interact with Riak
 	private static RiakCluster setUpCluster() throws UnknownHostException {
 		// This example will use only one node listening on localhost:10017
-		RiakNode node = new RiakNode.Builder().withRemoteAddress("127.0.0.1").withRemotePort(8087).build();
+		RiakNode node = new RiakNode.Builder().withRemoteAddress("18.220.122.237").build();
 
 		// This cluster object takes our one node as an argument
 		RiakCluster cluster = new RiakCluster.Builder(node).build();
@@ -54,11 +55,16 @@ public class TasteOfRiak {
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
 		csv.readPerson(pathToCsv);
+
 		for (Person per : csv.getPersons()) {
 			Namespace personsBucket = new Namespace("person");
 			Location personLocation = new Location(personsBucket, per.getId());
+
 			StoreValue storePersonOp = new StoreValue.Builder(per).withLocation(personLocation).build();
+			System.out.println(per);
+
 			client.execute(storePersonOp);
+
 		}
 	}
 
@@ -66,6 +72,8 @@ public class TasteOfRiak {
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
 		csv.readFeedback(pathToCsv);
+		double csvLength = csv.getFeedbacks().size();
+		double i = 0;
 		for (Feedback feed : csv.getFeedbacks()) {
 			Namespace personsBucket = new Namespace("feedback");
 			Location personLocation = new Location(personsBucket, feed.getAsin() + feed.getPersonId());// Combo asin +
@@ -74,6 +82,8 @@ public class TasteOfRiak {
 																										// uniques
 			StoreValue storePersonOp = new StoreValue.Builder(feed).withLocation(personLocation).build();
 			client.execute(storePersonOp);
+			i++;
+			System.out.println(String.format("%.2f", (i / csvLength) * 100 ) + "%");
 		}
 	}
 
@@ -81,11 +91,15 @@ public class TasteOfRiak {
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
 		csv.readProduct(pathToCsv, pathToCsvByBrand);
+		double csvLength = csv.getProducts().size();
+		double i = 0;
 		for (Product prod : csv.getProducts()) {
 			Namespace personsBucket = new Namespace("product");
 			Location personLocation = new Location(personsBucket, prod.getAsin());
 			StoreValue storePersonOp = new StoreValue.Builder(prod).withLocation(personLocation).build();
 			client.execute(storePersonOp);
+			i++;
+			System.out.println(String.format("%.2f", (i / csvLength) * 100 ) + "%");
 		}
 	}
 
@@ -93,11 +107,15 @@ public class TasteOfRiak {
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
 		csv.readVendor(pathToCsv);
+		double csvLength = csv.getVendors().size();
+		double i = 0;
 		for (Vendor vend : csv.getVendors()) {
 			Namespace personsBucket = new Namespace("vendor");
 			Location personLocation = new Location(personsBucket, vend.getVendor());
 			StoreValue storePersonOp = new StoreValue.Builder(vend).withLocation(personLocation).build();
 			client.execute(storePersonOp);
+			i++;
+			System.out.println(String.format("%.2f", (i / csvLength) * 100 ) + "%");
 		}
 	}
 
@@ -105,28 +123,36 @@ public class TasteOfRiak {
 			throws ExecutionException, InterruptedException {
 		Xml xml = new Xml();
 		xml.readInvoice(pathToCsv);
+		double xmlLength = xml.getInvoices().size();
+		double i = 0;
 		for (Order inv : xml.getInvoices()) {
-			try {// Object too heavy ( #samuel )
+			try {// Object really heavy 
 				Namespace personsBucket = new Namespace("invoice");
 				Location personLocation = new Location(personsBucket, inv.getOrderId());
 				StoreValue storePersonOp = new StoreValue.Builder(inv).withLocation(personLocation).build();
 				client.execute(storePersonOp);
+				i++;
+				System.out.println(String.format("%.2f", (i / xmlLength) * 100 ) + "%");
 			} catch (Exception e) {
 //				e.printStackTrace();
 			}
 		}
 	}
 
-	private static void storeOrder(String pathToCsv, RiakClient client)
+	private static void storeOrder(String pathToJson, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException, RiakResponseException {
 		Json json = new Json();
-		json.readOrder(pathToCsv);
+		json.readOrder(pathToJson);
+		double jsonLength = json.getOrders().size();
+		double i = 0;
 		for (Order jayson : json.getOrders()) {
-			try {// Object too large ( #ouali )
+			try {// Object really large 
 				Namespace personsBucket = new Namespace("order");
 				Location personLocation = new Location(personsBucket, "gdsgfg");
 				StoreValue storePersonOp = new StoreValue.Builder(jayson).withLocation(personLocation).build();
 				client.execute(storePersonOp);
+				i++;
+				System.out.println(String.format("%.2f", (i / jsonLength) * 100 ) + "%");
 			} catch (Exception e) {
 
 			}
@@ -140,29 +166,15 @@ public class TasteOfRiak {
 			RiakClient client = new RiakClient(cluster);
 			System.out.println("Client object successfully created");
 
-//			storePerson(PATH + "Customer/person_0_0.csv",client);
-//			storeFeedback(PATH + "Feedback/Feedback.csv",client);
-//			storeProduct(PATH + "Product/Product.csv","/home/loubard/Documents/BD_BigTable/DATA/Product/BrandByProduct.csv",client);
-//			storeVendor(PATH + "Vendor/Vendor.csv",client);
-//			storeInvoice(PATH + "Invoice/Invoice.xml", client);
-			storeOrder(PATH + "Order/Order.json", client);
-
-//
-//			Namespace personsBucket = new Namespace("invoice");
-//			Location personLocation = new Location(personsBucket, "4da0a2a0-770d-479d-b48f-dcfab4a33e7c");
-//			FetchValue fetchMobyDickOp = new FetchValue.Builder(personLocation).build();
-//			Order fetchedBook = client.execute(fetchMobyDickOp).getValue(Order.class);
-//			System.out.println(fetchedBook.getTotalPrice());
-//
-//			Namespace animalsBucket = new Namespace("invoice");
-//			FetchBucketProperties fetchProps = new FetchBucketProperties.Builder(animalsBucket).build();
-//			Response response = client.execute(fetchProps);
-//			BucketProperties props = response.getBucketProperties();
-//			System.out.println(props);
-
-			Json json = new Json();
-			json.readOrder("/home/loubard/Documents/BD_BigTable/DATA/Order/Order.json");
-
+/////////////////////////// Alimente la BDD, extremement long et a usage unique///////////////////////
+//			storePerson(PATH + "Customer/person_0_0.csv",client);									//
+//			storeFeedback(PATH + "Feedback/Feedback.csv",client);									//
+//			storeProduct(PATH + "Product/Product.csv",PATH + "Product/BrandByProduct.csv",client);	//
+//			storeVendor(PATH + "Vendor/Vendor.csv",client);											//
+//			storeInvoice(PATH + "Invoice/Invoice.xml", client);										//
+//			storeOrder(PATH + "Order/Order.json", client);											//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+            
 			cluster.shutdown();
 
 		} catch (Exception e) {
