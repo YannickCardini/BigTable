@@ -1,12 +1,13 @@
-package src.main.java.read;
+package main.java.read;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import src.main.java.documents.Doc;
-import src.main.java.documents.Order;
+import main.java.documents.Doc;
+import main.java.documents.Order;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import java.io.File;

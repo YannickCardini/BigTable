@@ -1,4 +1,4 @@
-package src.main.java.setup;
+package main.java.setup;
 
 
 import com.basho.riak.client.api.RiakClient;
@@ -17,28 +17,42 @@ import com.basho.riak.client.core.query.Namespace;
 import com.basho.riak.client.core.query.RiakObject;
 import com.basho.riak.client.core.util.BinaryValue;
 
-import src.main.java.documents.Feedback;
-import src.main.java.documents.Order;
-import src.main.java.documents.Person;
-import src.main.java.documents.Product;
-import src.main.java.documents.Vendor;
-import src.main.java.read.Csv;
-import src.main.java.read.Json;
-import src.main.java.read.Xml;
+import main.java.documents.Feedback;
+import main.java.documents.Order;
+import main.java.documents.Person;
+import main.java.documents.Product;
+import main.java.documents.Vendor;
+import main.java.read.Csv;
+import main.java.read.Json;
+import main.java.read.Xml;
+import main.java.util.ToolBox;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.text.ParseException;
 import java.util.concurrent.ExecutionException;
 
 public class TasteOfRiak {
 	// A basic POJO class to demonstrate typed exchanges with Riak
-	public static final String PATH = "/home/loubard/Documents/BD_BigTable/DATA/";
+	//public static final String PATH = "/home/loubard/Documents/BD_BigTable/DATA/";
 
+	// TODO : modifier le nom du dossier #YannickMiage
+	public static final String PROJECT_PATH = ToolBox.getProjectDirectoryPath();
+	public static String dataPath;
+	
+	//get Data directory
+	private static String getDataDirectory() {
+		return dataPath;
+	}
+	
 	// This will create a client object that we can use to interact with Riak
 	private static RiakCluster setUpCluster() throws UnknownHostException {
+
 		// This example will use only one node listening on localhost:10017
 		RiakNode node = new RiakNode.Builder().withRemoteAddress("18.220.122.237").build();
 
@@ -154,7 +168,6 @@ public class TasteOfRiak {
 				i++;
 				System.out.println(String.format("%.2f", (i / jsonLength) * 100 ) + "%");
 			} catch (Exception e) {
-
 			}
 		}
 	}
@@ -174,7 +187,6 @@ public class TasteOfRiak {
 //			storeInvoice(PATH + "Invoice/Invoice.xml", client);										//
 //			storeOrder(PATH + "Order/Order.json", client);											//
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-            
 			cluster.shutdown();
 
 		} catch (Exception e) {

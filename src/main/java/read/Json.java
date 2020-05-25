@@ -1,4 +1,4 @@
-package src.main.java.read;
+package main.java.read;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -10,8 +10,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import src.main.java.documents.Doc;
-import src.main.java.documents.Order;
+import main.java.documents.Doc;
+import main.java.documents.Order;
 
 public class Json {
 	
@@ -61,8 +61,9 @@ public class Json {
 		JSONObject obj;
 		// This will reference one line at a time
 		String line = null;
-
+		
 		try {
+						
 			// FileReader reads text files in the default encoding.
 			FileReader fileReader = new FileReader(pathToJson);
 
@@ -76,9 +77,9 @@ public class Json {
 			// Always close files.
 			bufferedReader.close();
 		} catch (FileNotFoundException ex) {
-			System.out.println("Unable to open file '" + pathToJson + "'");
+			System.out.println("Unable to open file '" + file.getAbsolutePath() + "'");
 		} catch (IOException ex) {
-			System.out.println("Error reading file '" + pathToJson + "'");
+			System.out.println("Error reading file '" + file.getAbsolutePath() + "'");
 			// Or we could just do this:
 			// ex.printStackTrace();
 		} catch (ParseException e) {

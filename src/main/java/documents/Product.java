@@ -1,4 +1,4 @@
-package src.main.java.documents;
+package main.java.documents;
 
 public class Product {
 	public String getAsin() {

@@ -1,10 +1,16 @@
-package src.main.java.read;
+package main.java.read;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
+
+import main.java.documents.Feedback;
+import main.java.documents.Person;
+import main.java.documents.Product;
+import main.java.documents.Vendor;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -13,11 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-
-import src.main.java.documents.Feedback;
-import src.main.java.documents.Person;
-import src.main.java.documents.Product;
-import src.main.java.documents.Vendor;
 
 public class Csv {
 	

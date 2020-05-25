@@ -1,4 +1,4 @@
-package src.main.java.documents;
+package main.java.documents;
 
 import java.util.Date;
 
