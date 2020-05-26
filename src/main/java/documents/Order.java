@@ -1,7 +1,6 @@
 package main.java.documents;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Order {
 	
@@ -11,16 +10,16 @@ public class Order {
 	public void setPersonId(String personId) {
 		PersonId = personId;
 	}
-	public Date getOrderDate() {
+	public String getOrderDate() {
 		return OrderDate;
 	}
-	public void setOrderDate(Date orderDate) {
+	public void setOrderDate(String orderDate) {
 		OrderDate = orderDate;
 	}
-	public double getTotalPrice() {
+	public String getTotalPrice() {
 		return TotalPrice;
 	}
-	public void setTotalPrice(double totalPrice) {
+	public void setTotalPrice(String totalPrice) {
 		TotalPrice = totalPrice;
 	}
 	public String getOrderId() {
@@ -38,8 +37,8 @@ public class Order {
 
 	private String OrderId;
 	private String PersonId;
-	private Date OrderDate;
-	private double TotalPrice;
+	private String OrderDate;
+	private String TotalPrice;
 	private ArrayList<Doc> Orderline; 
 	
 

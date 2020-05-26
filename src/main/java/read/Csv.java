@@ -1,10 +1,8 @@
 package main.java.read;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Date;
 
 import main.java.documents.Feedback;
 import main.java.documents.Person;
@@ -12,12 +10,6 @@ import main.java.documents.Product;
 import main.java.documents.Vendor;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 
 public class Csv {
@@ -68,76 +60,53 @@ public class Csv {
 	    return null;
 	}
 	
-	public static boolean isNumeric(String strNum) {
-	    if (strNum == null) {
-	        return false;
-	    }
-	    try {
-	        double d = Double.parseDouble(strNum);
-	    } catch (NumberFormatException nfe) {
-	        return false;
-	    }
-	    return true;
-	}
-
-	Date convertIsoStringToDate(String s) {
-		DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-				// date/time
-				.append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-				// offset (hh:mm - "+00:00" when it's zero)
-				.optionalStart().appendOffset("+HH:MM", "+00:00").optionalEnd()
-				// offset (hhmm - "+0000" when it's zero)
-				.optionalStart().appendOffset("+HHMM", "+0000").optionalEnd()
-				// offset (hh - "Z" when it's zero)
-				.optionalStart().appendOffset("+HH", "Z").optionalEnd()
-				// create formatter
-				.toFormatter();
-		String str = OffsetDateTime.parse(s, formatter).toString();
-		TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(str);
-		Instant i = Instant.from(ta);
-		Date d = Date.from(i);
-		return d;
-	}
-	
 	Person parseStringToPersonList(String[] data) throws ParseException{
-		SimpleDateFormat formatBirthday = new SimpleDateFormat("yyyy-MM-dd");
 		Person pers = new Person();
 		pers.setId(data[0]);
 		pers.setFirstName(data[1]);
 		pers.setLastName(data[2]);
 		pers.setGender(data[3]);
-		pers.setBirthday((Date)formatBirthday.parse(data[4]));
-		pers.setCreateDate(convertIsoStringToDate(data[5]));
+		pers.setBirthday(data[4]);
+		pers.setCreateDate(data[5]);
 		pers.setLocation(data[6]);
 		pers.setBrowserUsed(data[7]);
-	    pers.setPlace(Integer.parseInt(data[8]));
+	    pers.setPlace(data[8]);
 	    return pers; 
 	}
 	
 	Feedback parseStringToFeedbackList(String[] data) throws ParseException{
 		Feedback feed = new Feedback();
 		String[] asinAndId = data[0].split("\\|");
-		feed.setAsin(asinAndId[0]);
-		feed.setPersonId(asinAndId[1]);
-		feed.setFeedback(data[1]);
+		String asinAndId0 = asinAndId[0] != null ? asinAndId[0]: "null";
+		String asinAndId1 = asinAndId[1] != null ? asinAndId[1]: "null";
+		String data1 = data[1] != null ? data[1]: "null";
+		feed.setAsin(asinAndId0);
+		feed.setPersonId(asinAndId1);
+		feed.setFeedback(data1);
 	    return feed; 
 	}
 	
 	Product parseStringToProductList(String[] data) throws ParseException{
 		Product prod = new Product();
-		prod.setAsin(data[0]);
-		prod.setTitle(data[1]);
-		if(isNumeric(data[2]))
-			prod.setPrice(Float.parseFloat(data[2]));
-		prod.setImgUrl(data[3]);
+		String data0 = data[0] != null ? data[0]: "null";
+		String data1 = data[1] != null ? data[1]: "null";
+		String data2 = data[2] != null ? data[2]: "null";
+		String data3 = data[3] != null ? data[3]: "null";
+		prod.setAsin(data0);
+		prod.setTitle(data1);
+		prod.setPrice(data2);
+		prod.setImgUrl(data3);
 	    return prod; 
 	}
 	
 	Vendor parseStringToVendorList(String[] data) throws ParseException{
 		Vendor vend = new Vendor();
-		vend.setVendor(data[0]);
-		vend.setCountry(data[1]);
-		vend.setIndustry(data[2]);
+		String data0 = data[0] != null ? data[0]: "null";
+		String data1 = data[1] != null ? data[1]: "null";
+		String data2 = data[2] != null ? data[2]: "null";
+		vend.setVendor(data0);
+		vend.setCountry(data1);
+		vend.setIndustry(data2);
 	    return vend; 
 	}
 	
@@ -173,7 +142,7 @@ public class Csv {
 		csvReader.close();
 		BufferedReader csvReaderByBrand = new BufferedReader(new FileReader(pathToCsvByBrand));
 		while ((row = csvReaderByBrand.readLine()) != null) {
-			String data[] = row.split(",");
+			String data[] = row.split(",");			
 			setBrandByProductAsin(data[1],data[0]);
 		}
 		csvReaderByBrand.close();

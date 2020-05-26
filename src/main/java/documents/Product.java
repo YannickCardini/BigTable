@@ -7,10 +7,10 @@ public class Product {
 	public void setAsin(String asin) {
 		this.asin = asin;
 	}
-	public Float getPrice() {
+	public String getPrice() {
 		return price;
 	}
-	public void setPrice(Float price) {
+	public void setPrice(String price) {
 		this.price = price;
 	}
 	public String getImgUrl() {
@@ -33,7 +33,7 @@ public class Product {
 	}
 	private String asin;
 	private String title;
-	private Float price;
+	private String price;
 	private String imgUrl;
 	private String Brand;
 }

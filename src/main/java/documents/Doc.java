@@ -20,10 +20,10 @@ public class Doc {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public double getPrice() {
+	public String getPrice() {
 		return price;
 	}
-	public void setPrice(double price) {
+	public void setPrice(String price) {
 		this.price = price;
 	}
 	public String getBrand() {
@@ -35,7 +35,7 @@ public class Doc {
 	private String productId;
 	private String asin;
 	private String title;
-	private double price;
+	private String price;
 	private String brand;
 	
 }

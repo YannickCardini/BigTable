@@ -38,7 +38,7 @@ public class Json {
 			doc.setProductId((String)obj.get("OrderId"));
 			doc.setAsin((String)obj.get("asin"));
 			doc.setTitle((String)obj.get("Title"));
-			doc.setPrice((double)obj.get("price"));
+			doc.setPrice((String)obj.get("price"));
 			doc.setBrand((String)obj.get("brand"));
 			orderlines.add(doc);
 		}
@@ -56,7 +56,7 @@ public class Json {
 		return ord;
 	}
 
-	public void readOrder(String pathToJson) throws java.text.ParseException {
+	public void readOrder(String pathToJson) throws java.text.ParseException, IOException {
 		
 		JSONObject obj;
 		// This will reference one line at a time
@@ -76,12 +76,6 @@ public class Json {
 			}
 			// Always close files.
 			bufferedReader.close();
-		} catch (FileNotFoundException ex) {
-			System.out.println("Unable to open file '" + file.getAbsolutePath() + "'");
-		} catch (IOException ex) {
-			System.out.println("Error reading file '" + file.getAbsolutePath() + "'");
-			// Or we could just do this:
-			// ex.printStackTrace();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -64,10 +64,10 @@ public class Xml {
 					inv.setPersonId(personId);
 
 					String orderDate = eElement.getElementsByTagName("OrderDate").item(0).getTextContent();
-					inv.setOrderDate((Date) formatOrder.parse(orderDate));
+					inv.setOrderDate(orderDate);
 
 					String totalPrice = eElement.getElementsByTagName("TotalPrice").item(0).getTextContent();
-					inv.setTotalPrice(Double.parseDouble(totalPrice));
+					inv.setTotalPrice(totalPrice);
 
 					orderLine = eElement.getElementsByTagName("Orderline");
 					
@@ -89,7 +89,7 @@ public class Xml {
 							docu.setTitle(title);
 
 							String price = e.getElementsByTagName("price").item(0).getTextContent();
-							docu.setPrice(Double.parseDouble(price));
+							docu.setPrice(price);
 
 							String brand = e.getElementsByTagName("brand").item(0).getTextContent();
 							docu.setBrand(brand);

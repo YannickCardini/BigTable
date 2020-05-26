@@ -1,18 +1,16 @@
 package main.java.documents;
 
-import java.util.Date;
-
 public class Person {
 	
 	private String id;
 	private String firstName;
 	private String lastName;
 	private String gender;
-	private Date birthday;
-	private Date createDate;
+	private String birthday;
+	private String createDate;
 	private String location;
 	private String browserUsed;
-	private int place;
+	private String place;
 	
 	public String getId() {
 		return id;
@@ -38,16 +36,16 @@ public class Person {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-	public Date getBirthday() {
+	public String getBirthday() {
 		return birthday;
 	}
-	public void setBirthday(Date birthday) {
+	public void setBirthday(String birthday) {
 		this.birthday = birthday;
 	}
-	public Date getCreateDate() {
+	public String getCreateDate() {
 		return createDate;
 	}
-	public void setCreateDate(Date createDate) {
+	public void setCreateDate(String createDate) {
 		this.createDate = createDate;
 	}
 	public String getLocation() {
@@ -62,10 +60,10 @@ public class Person {
 	public void setBrowserUsed(String browserUsed) {
 		this.browserUsed = browserUsed;
 	}
-	public int getPlace() {
+	public String getPlace() {
 		return place;
 	}
-	public void setPlace(int place) {
+	public void setPlace(String place) {
 		this.place = place;
 	}
 

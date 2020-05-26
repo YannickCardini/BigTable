@@ -1,6 +1,5 @@
 package main.java.setup;
 
-
 import com.basho.riak.client.api.RiakClient;
 import com.basho.riak.client.api.cap.Quorum;
 import com.basho.riak.client.api.commands.kv.FetchValue;
@@ -29,17 +28,18 @@ import com.basho.riak.client.*;
 
 public class TasteOfRiak {
 	// A basic POJO class to demonstrate typed exchanges with Riak
-	public static final String PATH = "/home/benoit/Documents/ressources/";
+	// public static final String PATH = "/home/benoit/Documents/ressources/";
+	public static final String PATH = "/home/loubard/Documents/BD_BigTable/DATA/";
 
 	// TODO : modifier le nom du dossier #YannickMiage
 	public static final String PROJECT_PATH = ToolBox.getProjectDirectoryPath();
 	public static String dataPath;
-	
-	//get Data directory
+
+	// get Data directory
 	private static String getDataDirectory() {
 		return dataPath;
 	}
-	
+
 	// This will create a client object that we can use to interact with Riak
 	private static RiakCluster setUpCluster() throws UnknownHostException {
 
@@ -58,37 +58,146 @@ public class TasteOfRiak {
 	private static void storePerson(String pathToCsv, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
-		csv.readPerson(pathToCsv);
+		csv.readProduct(pathToCsv, pathToCsv);
+		double csvLength = csv.getPersons().size();
+		double i = 0;
+		for (Person pers : csv.getPersons()) {
+			Location loc;
+			RiakObject ro;
+			StoreValue storeOp;
+			Namespace bucket = new Namespace("person", pers.getId());
 
-		for (Person per : csv.getPersons()) {
-			Namespace personsBucket = new Namespace("person");
-			Location personLocation = new Location(personsBucket, per.getId());
+			if (pers.getBirthday() != null && pers.getBirthday().length() > 0) {
+				loc = new Location(bucket, "birthday");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getBirthday()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
 
-			StoreValue storePersonOp = new StoreValue.Builder(per).withLocation(personLocation).build();
-			System.out.println(per);
+			if (pers.getFirstName() != null && pers.getFirstName().length() > 0) {
+				loc = new Location(bucket, "firstName");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getFirstName()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
 
-			client.execute(storePersonOp);
+			if (pers.getLastName() != null && pers.getLastName().length() > 0) {
+				loc = new Location(bucket, "lastName");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getLastName()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
 
+			if (pers.getGender() != null && pers.getGender().length() > 0) {
+				loc = new Location(bucket, "gender");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getGender()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (pers.getCreateDate() != null && pers.getCreateDate().length() > 0) {
+				loc = new Location(bucket, "createDate");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getCreateDate()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (pers.getLocation() != null && pers.getLocation().length() > 0) {
+				loc = new Location(bucket, "location");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getLocation()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (pers.getBrowserUsed() != null && pers.getBrowserUsed().length() > 0) {
+				loc = new Location(bucket, "browserUsed");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getBrowserUsed()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (pers.getPlace() != null && pers.getPlace().length() > 0) {
+				loc = new Location(bucket, "place");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(pers.getPlace()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			i++;
+			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
 		}
 	}
 
 	private static void storeFeedback(String pathToCsv, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
-		csv.readFeedback(pathToCsv);
+		csv.readProduct(pathToCsv, pathToCsv);
 		double csvLength = csv.getFeedbacks().size();
 		double i = 0;
 		for (Feedback feed : csv.getFeedbacks()) {
-			Namespace personsBucket = new Namespace("feedback");
-			Location personLocation = new Location(personsBucket, feed.getAsin() + feed.getPersonId());// Combo asin +
-																										// personId car
-																										// aucun des 2
-																										// uniques
-			StoreValue storePersonOp = new StoreValue.Builder(feed).withLocation(personLocation).build();
-			client.execute(storePersonOp);
+			Location loc;
+			RiakObject ro;
+			StoreValue storeOp;
+			Namespace bucket = new Namespace("feedback", feed.getAsin() + feed.getPersonId());// Combo asin +personId
+																								// car aucun des 2
+																								// uniques
+
+			if (feed.getFeedback() != null && feed.getFeedback().length() > 0) {
+				loc = new Location(bucket, "feed");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(feed.getFeedback()));
+				storeOp = new StoreValue.Builder(ro).withLocation(loc).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
 			i++;
-			System.out.println(String.format("%.2f", (i / csvLength) * 100 ) + "%");
+			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
 		}
+
 	}
 
 	private static void storeProduct(String pathToCsv, String pathToCsvByBrand, RiakClient client)
@@ -98,103 +207,169 @@ public class TasteOfRiak {
 		double csvLength = csv.getProducts().size();
 		double i = 0;
 		for (Product prod : csv.getProducts()) {
-			Namespace personsBucket = new Namespace("product", prod.getAsin());
-			Location personLocation = new Location(personsBucket, "price");
-			RiakObject ro= new RiakObject();
-			ro.setValue(BinaryValue.create(prod.getPrice().toString()));
-System.out.println(prod.getAsin());
-			StoreValue storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
-			try {
-				client.execute(storePersonOp);
-			} catch (ExecutionException e) {
-				e.printStackTrace();
+			Location productLocation;
+			RiakObject ro;
+			StoreValue storeProductOp;
+			Namespace productBucket = new Namespace("product", prod.getAsin());
+
+			if (prod.getPrice() != null && prod.getPrice().length() > 0) {
+				productLocation = new Location(productBucket, "price");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(prod.getPrice()));
+				storeProductOp = new StoreValue.Builder(ro).withLocation(productLocation).build();
+				try {
+					client.execute(storeProductOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
 			}
 
-			personsBucket = new Namespace("product", prod.getAsin());
-			personLocation = new Location(personsBucket, "title");
-			ro= new RiakObject();
-			ro.setValue(BinaryValue.create(prod.getTitle()));
-
-			storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
-			try {
-				client.execute(storePersonOp);
-			} catch (ExecutionException e) {
-				e.printStackTrace();
+			if (prod.getTitle() != null && prod.getTitle().length() > 0) {
+				productLocation = new Location(productBucket, "title");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(prod.getTitle()));
+				storeProductOp = new StoreValue.Builder(ro).withLocation(productLocation).build();
+				try {
+					client.execute(storeProductOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
 			}
 
-			personsBucket = new Namespace("product", prod.getAsin());
-			personLocation = new Location(personsBucket, "imgUrl");
-			ro= new RiakObject();
-			ro.setValue(BinaryValue.create(prod.getImgUrl()));
-
-			storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
-			try {
-				client.execute(storePersonOp);
-			} catch (ExecutionException e) {
-				e.printStackTrace();
+			if (prod.getImgUrl() != null && prod.getImgUrl().length() > 0) {
+				productLocation = new Location(productBucket, "imgUrl");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(prod.getImgUrl()));
+				storeProductOp = new StoreValue.Builder(ro).withLocation(productLocation).build();
+				try {
+					client.execute(storeProductOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
 			}
 
-			personsBucket = new Namespace("product", prod.getAsin());
-			personLocation = new Location(personsBucket, "brand");
-			ro= new RiakObject();
-			ro.setValue(BinaryValue.create(prod.getBrand()));
-			storePersonOp = new StoreValue.Builder(ro).withLocation(personLocation).build();
-			try {
-				client.execute(storePersonOp);
-			} catch (ExecutionException e) {
-				e.printStackTrace();
+			if (prod.getBrand() != null && prod.getBrand().length() > 0) {
+				productLocation = new Location(productBucket, "brand");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(prod.getBrand()));
+				storeProductOp = new StoreValue.Builder(ro).withLocation(productLocation).build();
+				try {
+					client.execute(storeProductOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
 			}
+			i++;
+			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
 		}
 	}
 
 	private static void updateProduct(String bucketName, String productKey, String newValue, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Location productLocation = new Location(new Namespace("product", bucketName), productKey);
-		FetchValue fetch = new FetchValue.Builder(productLocation)
-				.build();
+		FetchValue fetch = new FetchValue.Builder(productLocation).build();
 		FetchValue.Response response = client.execute(fetch);
 		RiakObject obj = response.getValue(RiakObject.class);
 		obj.setValue(BinaryValue.create(newValue));
-		/*UpdateValue updateOp = new UpdateValue.Builder(productLocation)
-				.withUpdate(UpdateValue.Update.clobberUpdate(brandNewUser))
-				.build();
-		client.execute(updateOp);*/
+		/*
+		 * UpdateValue updateOp = new UpdateValue.Builder(productLocation)
+		 * .withUpdate(UpdateValue.Update.clobberUpdate(brandNewUser)) .build();
+		 * client.execute(updateOp);
+		 */
 		System.out.println("Opération de mise à jour réussie");
 	}
 
 	private static void storeVendor(String pathToCsv, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
-		csv.readVendor(pathToCsv);
+		csv.readProduct(pathToCsv, pathToCsv);
 		double csvLength = csv.getVendors().size();
 		double i = 0;
 		for (Vendor vend : csv.getVendors()) {
-			Namespace personsBucket = new Namespace("vendor");
-			Location personLocation = new Location(personsBucket, vend.getVendor());
-			StoreValue storePersonOp = new StoreValue.Builder(vend).withLocation(personLocation).build();
-			client.execute(storePersonOp);
+			Location vendorLocation;
+			RiakObject ro;
+			StoreValue storeOp;
+			Namespace bucket = new Namespace("vendor", vend.getVendor());
+
+			if (vend.getCountry() != null && vend.getCountry().length() > 0) {
+				vendorLocation = new Location(bucket, "country");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(vend.getCountry()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (vend.getIndustry() != null && vend.getIndustry().length() > 0) {
+				vendorLocation = new Location(bucket, "industry");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(vend.getIndustry()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
 			i++;
-			System.out.println(String.format("%.2f", (i / csvLength) * 100 ) + "%");
+			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
 		}
 	}
 
-	private static void storeInvoice(String pathToCsv, RiakClient client)
+	private static void storeInvoice(String pathToXml, RiakClient client)
 			throws ExecutionException, InterruptedException {
 		Xml xml = new Xml();
-		xml.readInvoice(pathToCsv);
-		double xmlLength = xml.getInvoices().size();
+		xml.readInvoice(pathToXml);
+		double csvLength = xml.getInvoices().size();
 		double i = 0;
 		for (Order inv : xml.getInvoices()) {
-			try {// Object really heavy
-				Namespace personsBucket = new Namespace("invoice");
-				Location personLocation = new Location(personsBucket, inv.getOrderId());
-				StoreValue storePersonOp = new StoreValue.Builder(inv).withLocation(personLocation).build();
-				client.execute(storePersonOp);
-				i++;
-				System.out.println(String.format("%.2f", (i / xmlLength) * 100 ) + "%");
-			} catch (Exception e) {
-//				e.printStackTrace();
+			Location vendorLocation;
+			RiakObject ro;
+			StoreValue storeOp;
+			Namespace bucket = new Namespace("invoice", inv.getOrderId());
+
+			if (inv.getPersonId() != null && inv.getPersonId().length() > 0) {
+				vendorLocation = new Location(bucket, "personId");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(inv.getPersonId()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
 			}
+
+			if (inv.getOrderDate() != null && inv.getOrderDate().length() > 0) {
+				vendorLocation = new Location(bucket, "orderDate");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(inv.getOrderDate()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (inv.getTotalPrice() != null && inv.getTotalPrice().length() > 0) {
+				vendorLocation = new Location(bucket, "totalPrice");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(inv.getTotalPrice()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			i++;
+			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
 		}
 	}
 
@@ -202,18 +377,52 @@ System.out.println(prod.getAsin());
 			throws IOException, ParseException, ExecutionException, InterruptedException, RiakResponseException {
 		Json json = new Json();
 		json.readOrder(pathToJson);
-		double jsonLength = json.getOrders().size();
+		double csvLength = json.getOrders().size();
 		double i = 0;
-		for (Order jayson : json.getOrders()) {
-			try {// Object really large
-				Namespace personsBucket = new Namespace("order");
-				Location personLocation = new Location(personsBucket, "gdsgfg");
-				StoreValue storePersonOp = new StoreValue.Builder(jayson).withLocation(personLocation).build();
-				client.execute(storePersonOp);
-				i++;
-				System.out.println(String.format("%.2f", (i / jsonLength) * 100 ) + "%");
-			} catch (Exception e) {
+		for (Order ord : json.getOrders()) {
+			Location vendorLocation;
+			RiakObject ro;
+			StoreValue storeOp;
+			Namespace bucket = new Namespace("order", ord.getOrderId());
+
+			if (ord.getPersonId() != null && ord.getPersonId().length() > 0) {
+				vendorLocation = new Location(bucket, "personId");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(ord.getPersonId()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
 			}
+
+			if (ord.getOrderDate() != null && ord.getOrderDate().length() > 0) {
+				vendorLocation = new Location(bucket, "orderDate");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(ord.getOrderDate()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (ord.getTotalPrice() != null && ord.getTotalPrice().length() > 0) {
+				vendorLocation = new Location(bucket, "totalPrice");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(ord.getTotalPrice()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			i++;
+			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
 		}
 	}
 
@@ -224,58 +433,16 @@ System.out.println(prod.getAsin());
 			RiakClient client = new RiakClient(cluster);
 			System.out.println("Client object successfully created");
 
-/////////////////////////// Alimente la BDD, extremement long et a usage unique///////////////////////
-//			storePerson(PATH + "Customer/person_0_0.csv",client);									//
-//			storeFeedback(PATH + "Feedback/Feedback.csv",client);									//
-//			storeProduct(PATH + "Product/Product.csv",PATH + "Product/BrandByProduct.csv",client);	//
-//			storeVendor(PATH + "Vendor/Vendor.csv",client);											//
-//			storeInvoice(PATH + "Invoice/Invoice.xml", client);										//
-//			storeOrder(PATH + "Order/Order.json", client);											//
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//			storePerson(PATH + "Customer/person_0_0.csv",client);
-//			storeFeedback(PATH + "Feedback/Feedback.csv",client);
+			/////////////////////////// Alimente la BDD, extremement long et a usage
+			/////////////////////////// unique///////////////////////
+			// storePerson(PATH + "Customer/person_0_0.csv",client); //
+			// storeFeedback(PATH + "Feedback/Feedback.csv",client); //
+			storeProduct(PATH + "Product/Product.csv", PATH + "Product/BrandByProduct.csv", client); //
+			// storeVendor(PATH + "Vendor/Vendor.csv",client); //
+			// storeInvoice(PATH + "Invoice/Invoice.xml", client); //
+			// storeOrder(PATH + "Order/Order.json", client); //
+			//////////////////////////////////////////////////////////////////////////////////////////////////////
 
-					//Test d'insertion de tous les Product
-			//String productPath = PROJECT_PATH+"/ressources/Product" + ToolBox.SEPARATOR + "Product.csv";
-			//File op = ToolBox.getFileIntoRessources(productPath);
-
-			//String product2Path = PROJECT_PATH+"/ressources/Product" + ToolBox.SEPARATOR + "BrandByProduct.csv";
-			//File op2 = ToolBox.getFileIntoRessources(product2Path);
-
-			//storeProduct(productPath, product2Path, client);
-
-
-	//
-//			Namespace personsBucket = new Namespace("invoice");
-//			Location personLocation = new Location(personsBucket, "4da0a2a0-770d-479d-b48f-dcfab4a33e7c");
-//			FetchValue fetchMobyDickOp = new FetchValue.Builder(personLocation).build();
-//			Order fetchedBook = client.execute(fetchMobyDickOp).getValue(Order.class);
-//			System.out.println(fetchedBook.getTotalPrice());
-	////			Namespace animalsBucket = new Namespace("invoice");
-//			FetchBucketProperties fetchProps = new FetchBucketProperties.Builder(animalsBucket).build();
-//			Response response = client.execute(fetchProps);
-//			BucketProperties props = response.getBucketProperties();
-//			System.out.println(props);
-
-			/*Json json = new Json();
-			json.readOrder(op);*/
-
-			//Test de modification d'une donnée (à terminer)
-/*Location myKey = new Location(new Namespace("product","2094869245"), "price");
-FetchValue fetch = new FetchValue.Builder(myKey)
-        .build();
-FetchValue.Response response = client.execute(fetch);
-RiakObject obj = response.getValue(RiakObject.class);
-System.out.println("Ancien objet: "+obj.getValue());
-
-updateProduct("2094869245", "title","test",client);
-
-			myKey = new Location(new Namespace("product","2094869245"), "price");
-			fetch = new FetchValue.Builder(myKey)
-					.build();
-			response = client.execute(fetch);
-			obj = response.getValue(RiakObject.class);
-			System.out.println("Nouvel objet: "+obj.getValue());*/
 			cluster.shutdown();
 
 		} catch (Exception e) {
