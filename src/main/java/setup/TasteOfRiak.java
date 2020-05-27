@@ -58,9 +58,10 @@ public class TasteOfRiak {
 	private static void storePerson(String pathToCsv, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
-		csv.readProduct(pathToCsv, pathToCsv);
+		csv.readPerson(pathToCsv);
 		double csvLength = csv.getPersons().size();
 		double i = 0;
+
 		for (Person pers : csv.getPersons()) {
 			Location loc;
 			RiakObject ro;
@@ -171,7 +172,7 @@ public class TasteOfRiak {
 	private static void storeFeedback(String pathToCsv, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
-		csv.readProduct(pathToCsv, pathToCsv);
+		csv.readFeedback(pathToCsv);
 		double csvLength = csv.getFeedbacks().size();
 		double i = 0;
 		for (Feedback feed : csv.getFeedbacks()) {
@@ -282,7 +283,7 @@ public class TasteOfRiak {
 	private static void storeVendor(String pathToCsv, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
 		Csv csv = new Csv();
-		csv.readProduct(pathToCsv, pathToCsv);
+		csv.readVendor(pathToCsv);
 		double csvLength = csv.getVendors().size();
 		double i = 0;
 		for (Vendor vend : csv.getVendors()) {
@@ -367,6 +368,19 @@ public class TasteOfRiak {
 					e.printStackTrace();
 				}
 			}
+			
+			if (inv.getOrderLine() != null && inv.getOrderLine().length() > 0) {
+				vendorLocation = new Location(bucket, "totalPrice");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(inv.getOrderLine()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
 
 			i++;
 			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
@@ -420,6 +434,18 @@ public class TasteOfRiak {
 					e.printStackTrace();
 				}
 			}
+			
+			if (ord.getOrderLine() != null && ord.getOrderLine().length() > 0) {
+				vendorLocation = new Location(bucket, "totalPrice");
+				ro = new RiakObject();
+				ro.setValue(BinaryValue.create(ord.getOrderLine()));
+				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
+				try {
+					client.execute(storeOp);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
 
 			i++;
 			System.out.println(String.format("%.2f", (i / csvLength) * 100) + "%");
@@ -435,9 +461,9 @@ public class TasteOfRiak {
 
 			/////////////////////////// Alimente la BDD, extremement long et a usage
 			/////////////////////////// unique///////////////////////
-			// storePerson(PATH + "Customer/person_0_0.csv",client); //
-			// storeFeedback(PATH + "Feedback/Feedback.csv",client); //
-			storeProduct(PATH + "Product/Product.csv", PATH + "Product/BrandByProduct.csv", client); //
+			 storePerson(PATH + "Customer/person_0_0.csv",client); //
+			 storeFeedback(PATH + "Feedback/Feedback.csv",client); //
+//			storeProduct(PATH + "Product/Product.csv", PATH + "Product/BrandByProduct.csv", client); //
 			// storeVendor(PATH + "Vendor/Vendor.csv",client); //
 			// storeInvoice(PATH + "Invoice/Invoice.xml", client); //
 			// storeOrder(PATH + "Order/Order.json", client); //

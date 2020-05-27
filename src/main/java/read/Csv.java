@@ -88,6 +88,7 @@ public class Csv {
 	
 	Product parseStringToProductList(String[] data) throws ParseException{
 		Product prod = new Product();
+
 		String data0 = data[0] != null ? data[0]: "null";
 		String data1 = data[1] != null ? data[1]: "null";
 		String data2 = data[2] != null ? data[2]: "null";
@@ -96,6 +97,7 @@ public class Csv {
 		prod.setTitle(data1);
 		prod.setPrice(data2);
 		prod.setImgUrl(data3);
+
 	    return prod; 
 	}
 	
@@ -135,11 +137,14 @@ public class Csv {
 		BufferedReader csvReader = new BufferedReader(new FileReader(pathToCsv));
 		csvReader.readLine();// Skip the first line
 		String row = null;
+
 		while ((row = csvReader.readLine()) != null) {
 			String data[] = row.split(",");
+
 			products.add(parseStringToProductList(data));
 		}
 		csvReader.close();
+
 		BufferedReader csvReaderByBrand = new BufferedReader(new FileReader(pathToCsvByBrand));
 		while ((row = csvReaderByBrand.readLine()) != null) {
 			String data[] = row.split(",");			

@@ -49,7 +49,6 @@ public class Xml {
 			SimpleDateFormat formatOrder = new SimpleDateFormat("yyyy-MM-dd");
 //			Element eElement = null;
 			Node node = null;
-			NodeList orderLine = null;
 
 			for (int itr = 0; itr < nodeList.getLength(); itr++) {
 				node = nodeList.item(itr);
@@ -68,42 +67,47 @@ public class Xml {
 
 					String totalPrice = eElement.getElementsByTagName("TotalPrice").item(0).getTextContent();
 					inv.setTotalPrice(totalPrice);
-
-					orderLine = eElement.getElementsByTagName("Orderline");
 					
-
-					for (int j = 0; j < orderLine.getLength(); j++) {
-						Node order = orderLine.item(j);
-						Doc docu = new Doc();
-
-						if (order.getNodeType() == Node.ELEMENT_NODE) {
-							Element e = (Element) order;
-
-							String productId = e.getElementsByTagName("productId").item(0).getTextContent();
-							docu.setProductId(productId);
-
-							String asin = e.getElementsByTagName("asin").item(0).getTextContent();
-							docu.setAsin(asin);
-
-							String title = e.getElementsByTagName("title").item(0).getTextContent();
-							docu.setTitle(title);
-
-							String price = e.getElementsByTagName("price").item(0).getTextContent();
-							docu.setPrice(price);
-
-							String brand = e.getElementsByTagName("brand").item(0).getTextContent();
-							docu.setBrand(brand);
-						}
-						docs.add(docu);
-
-					}
-					inv.setOrderline(getDocs());
-					invoices.add(inv);
+					String orderLine = eElement.getElementsByTagName("Orderline").item(0).getTextContent();
+					inv.setOrderLine(orderLine);
 				}
 			}
+			
+
+//					orderLine = eElement.getElementsByTagName("Orderline");
+//					
+//
+//					for (int j = 0; j < orderLine.getLength(); j++) {
+//						Node order = orderLine.item(j);
+//						Doc docu = new Doc();
+//
+//						if (order.getNodeType() == Node.ELEMENT_NODE) {
+//							Element e = (Element) order;
+//
+//							String productId = e.getElementsByTagName("productId").item(0).getTextContent();
+//							docu.setProductId(productId);
+//
+//							String asin = e.getElementsByTagName("asin").item(0).getTextContent();
+//							docu.setAsin(asin);
+//
+//							String title = e.getElementsByTagName("title").item(0).getTextContent();
+//							docu.setTitle(title);
+//
+//							String price = e.getElementsByTagName("price").item(0).getTextContent();
+//							docu.setPrice(price);
+//
+//							String brand = e.getElementsByTagName("brand").item(0).getTextContent();
+//							docu.setBrand(brand);
+//						}
+//						docs.add(docu);
+//
+//					}
+//					inv.setOrderline(getDocs());
+//					invoices.add(inv);
+//				}
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-}
+}	

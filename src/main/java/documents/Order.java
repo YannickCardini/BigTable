@@ -28,18 +28,26 @@ public class Order {
 	public void setOrderId(String orderId) {
 		OrderId = orderId;
 	}
-	public ArrayList<Doc> getOrderline() {
-		return Orderline;
+//	public ArrayList<Doc> getOrderline() {
+//		return Orderline;
+//	}
+//	public void setOrderline(ArrayList<Doc> orderline) {
+//		Orderline = orderline;
+//	}
+
+	public String getOrderLine() {
+		return OrderLine;
 	}
-	public void setOrderline(ArrayList<Doc> orderline) {
-		Orderline = orderline;
+	public void setOrderLine(String orderLine) {
+		OrderLine = orderLine;
 	}
 
 	private String OrderId;
 	private String PersonId;
 	private String OrderDate;
 	private String TotalPrice;
-	private ArrayList<Doc> Orderline; 
+	private String OrderLine;
+//	private ArrayList<Doc> Orderline; 
 	
 
 }

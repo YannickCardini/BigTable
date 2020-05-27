@@ -40,19 +40,19 @@ public class Json {
 			doc.setTitle((String)obj.get("Title"));
 			doc.setPrice((String)obj.get("price"));
 			doc.setBrand((String)obj.get("brand"));
-			orderlines.add(doc);
+//			orderlines.add(doc);
 		}
 	}
 	
 	Order parseOrderFromJson(JSONObject obj) throws java.text.ParseException {
-		SimpleDateFormat formatOrder = new SimpleDateFormat("yyyy-MM-dd");
+//		SimpleDateFormat formatOrder = new SimpleDateFormat("yyyy-MM-dd");
 		Order ord = new Order();
 		ord.setOrderId((String)obj.get("OrderId"));
 		ord.setPersonId((String)obj.get("PersonId"));
-		ord.setOrderDate((Date)formatOrder.parse((String) obj.get("OrderDate")));
-		ord.setTotalPrice((Double)obj.get("TotalPrice"));
-		parseOrderlineFromOrder((JSONArray)obj.get("Orderline"));
-		ord.setOrderline(getOrderlines());
+		ord.setOrderDate((String)obj.get("OrderDate"));
+		ord.setTotalPrice((String)obj.get("TotalPrice"));
+		ord.setOrderDate((String)obj.get("Orderline"));
+//		parseOrderlineFromOrder((JSONArray)obj.get("Orderline"));
 		return ord;
 	}
 
