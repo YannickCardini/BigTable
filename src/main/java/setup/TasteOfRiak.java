@@ -1,7 +1,9 @@
 package main.java.setup;
 
 import com.basho.riak.client.api.RiakClient;
+import com.basho.riak.client.api.cap.ConflictResolverFactory;
 import com.basho.riak.client.api.cap.Quorum;
+import com.basho.riak.client.api.commands.kv.DeleteValue;
 import com.basho.riak.client.api.commands.kv.FetchValue;
 import com.basho.riak.client.api.commands.kv.StoreValue;
 import com.basho.riak.client.api.commands.kv.UpdateValue;
@@ -267,17 +269,47 @@ public class TasteOfRiak {
 
 	private static void updateProduct(String bucketName, String productKey, String newValue, RiakClient client)
 			throws IOException, ParseException, ExecutionException, InterruptedException {
-		Location productLocation = new Location(new Namespace("product", bucketName), productKey);
-		FetchValue fetch = new FetchValue.Builder(productLocation).build();
+
+	Location productLocation = new Location(new Namespace("product", bucketName), productKey);
+		FetchValue fetch = new FetchValue.Builder(productLocation)
+				.build();
 		FetchValue.Response response = client.execute(fetch);
 		RiakObject obj = response.getValue(RiakObject.class);
+		System.out.println(obj.getValue());
+
+		System.out.println("Ancienne valeur: "+obj.getValue().toString());
 		obj.setValue(BinaryValue.create(newValue));
-		/*
-		 * UpdateValue updateOp = new UpdateValue.Builder(productLocation)
-		 * .withUpdate(UpdateValue.Update.clobberUpdate(brandNewUser)) .build();
-		 * client.execute(updateOp);
-		 */
-		System.out.println("Opération de mise à jour réussie");
+
+		StoreValue updateOp = new StoreValue.Builder(obj)
+				.withLocation(productLocation)
+				.build();
+		StoreValue.Response updateOpResp = client.execute(updateOp);
+
+		productLocation = new Location(new Namespace("product", bucketName), productKey);
+		fetch = new FetchValue.Builder(productLocation).build();
+		response = client.execute(fetch);
+		obj = response.getValue(RiakObject.class);
+		System.out.println("Nouvelle valeur: "+obj.getValue().toString());
+		if(updateOpResp!=null) System.out.println("Opération de mise à jour réussie");
+		else System.out.println("Opération de mise à jour échouée");
+		/*UpdateValue updateOp = new UpdateValue.Builder(productLocation)
+				// As before, we set this option to true
+				.withFetchOption(FetchValue.Option.DELETED_VCLOCK, true)
+				.withUpdate(UpdateValue.Update.clobberUpdate("test"))
+				.build();*/
+
+	}
+
+	private static void deleteProduct(String bucketName, RiakClient client)
+			throws IOException, ParseException, ExecutionException, InterruptedException {
+
+		Location productLocation = new Location(new Namespace("product"), bucketName);
+
+		DeleteValue delete = new DeleteValue.Builder(productLocation).build();
+		client.execute(delete);
+
+		System.out.println("Bucket "+bucketName+" supprimé");
+
 	}
 
 	private static void storeVendor(String pathToCsv, RiakClient client)
@@ -368,7 +400,7 @@ public class TasteOfRiak {
 					e.printStackTrace();
 				}
 			}
-			
+
 			if (inv.getOrderLine() != null && inv.getOrderLine().length() > 0) {
 				vendorLocation = new Location(bucket, "totalPrice");
 				ro = new RiakObject();
@@ -434,7 +466,7 @@ public class TasteOfRiak {
 					e.printStackTrace();
 				}
 			}
-			
+
 			if (ord.getOrderLine() != null && ord.getOrderLine().length() > 0) {
 				vendorLocation = new Location(bucket, "totalPrice");
 				ro = new RiakObject();
@@ -459,8 +491,13 @@ public class TasteOfRiak {
 			RiakClient client = new RiakClient(cluster);
 			System.out.println("Client object successfully created");
 
+			ConflictResolverFactory factory = ConflictResolverFactory.getInstance();
+			factory.registerConflictResolver(RiakObject.class, new Resolver());
 			/////////////////////////// Alimente la BDD, extremement long et a usage
 			/////////////////////////// unique///////////////////////
+			// storePerson(PATH + "Customer/person_0_0.csv",client); //
+			// storeFeedback(PATH + "Feedback/Feedback.csv",client); //
+			//storeProduct(PATH + "Product/Product.csv", PATH + "Product/BrandByProduct.csv", client); //
 			 storePerson(PATH + "Customer/person_0_0.csv",client); //
 			 storeFeedback(PATH + "Feedback/Feedback.csv",client); //
 //			storeProduct(PATH + "Product/Product.csv", PATH + "Product/BrandByProduct.csv", client); //
@@ -469,6 +506,11 @@ public class TasteOfRiak {
 			// storeOrder(PATH + "Order/Order.json", client); //
 			//////////////////////////////////////////////////////////////////////////////////////////////////////
 
+			//Modification de données
+			//updateProduct("7245456259","title","testTitle2",client);
+
+			//suppression d'un bucket
+			deleteProduct("B000002NUS",client);
 			cluster.shutdown();
 
 		} catch (Exception e) {
