@@ -15,6 +15,7 @@ import com.basho.riak.client.core.query.Namespace;
 import com.basho.riak.client.core.query.RiakObject;
 import com.basho.riak.client.core.util.BinaryValue;
 import main.java.documents.*;
+import main.java.query.QueryApp;
 import main.java.read.Csv;
 import main.java.read.Json;
 import main.java.read.Xml;
@@ -49,7 +50,7 @@ public class TasteOfRiak {
 		RiakNode node = new RiakNode.Builder().withRemoteAddress("18.220.122.237").build();
 
 		// This cluster object takes our one node as an argument
-		RiakCluster cluster = new RiakCluster.Builder(node).build();
+	    RiakCluster cluster = new RiakCluster.Builder(node).build();
 
 		// The cluster must be started to work, otherwise you will see errors
 		cluster.start();
@@ -515,8 +516,9 @@ public class TasteOfRiak {
 			// storeOrder(PATH + "Order/Order.json", client); //
 			//////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			//Création d'un Product de test, pour l'insérer
-           /* Product testProd=new Product();
+			//Création d'un Product de test, pour l'insérer 
+			// test d'une query basique
+            /*Product testProd=new Product();
             testProd.setAsin("testInsertion");
             testProd.setBrand("brandTest");
             testProd.setImgUrl("imgUrlTest");
@@ -531,6 +533,11 @@ public class TasteOfRiak {
 
 			//suppression d'un bucket
 			//deleteProduct("B000002NUS",client);
+			
+			// Test de QueryApp
+			//QueryApp app = new QueryApp(cluster, client);
+			//app.getPeopleWithAsinAndPeriod("B002Q6DB7A", "2022-08-28", "2022-09-03");
+			
 			cluster.shutdown();
 
 		} catch (Exception e) {
