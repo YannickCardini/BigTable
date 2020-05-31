@@ -2,17 +2,17 @@ package main.java.setup;
 
 import com.basho.riak.client.api.RiakClient;
 import com.basho.riak.client.api.cap.ConflictResolverFactory;
-import com.basho.riak.client.api.cap.Quorum;
 import com.basho.riak.client.api.commands.kv.DeleteValue;
 import com.basho.riak.client.api.commands.kv.FetchValue;
 import com.basho.riak.client.api.commands.kv.StoreValue;
-import com.basho.riak.client.api.commands.kv.UpdateValue;
+import com.basho.riak.client.api.commands.search.StoreIndex;
 import com.basho.riak.client.core.RiakCluster;
 import com.basho.riak.client.core.RiakNode;
 import com.basho.riak.client.core.netty.RiakResponseException;
 import com.basho.riak.client.core.query.Location;
 import com.basho.riak.client.core.query.Namespace;
 import com.basho.riak.client.core.query.RiakObject;
+import com.basho.riak.client.core.query.search.YokozunaIndex;
 import com.basho.riak.client.core.util.BinaryValue;
 import main.java.documents.*;
 import main.java.query.QueryApp;
@@ -21,13 +21,10 @@ import main.java.read.Json;
 import main.java.read.Xml;
 import main.java.util.ToolBox;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.concurrent.ExecutionException;
-
-import com.basho.riak.client.*;
 
 public class TasteOfRiak {
 	// A basic POJO class to demonstrate typed exchanges with Riak
@@ -535,8 +532,15 @@ public class TasteOfRiak {
 			//deleteProduct("B000002NUS",client);
 			
 			// Test de QueryApp
-			//QueryApp app = new QueryApp(cluster, client);
-			//app.getPeopleWithAsinAndPeriod("B002Q6DB7A", "2022-08-28", "2022-09-03");
+			QueryApp app = new QueryApp(client, cluster);
+			System.out.println("---------------\n--- QUERY 1 ---\n---------------");
+			app.getPeopleForAsinAndPeriod("B000FIE4WC", "2022-08-28", "2022-09-03");
+			System.out.println("---------------\n--- QUERY 2 ---\n---------------");
+			app.getTotalSalesAndPopularityOfProduct("ice_hockey", "2014");
+			
+			/*YokozunaIndex famousIndex = new YokozunaIndex("famous");
+			StoreIndex storeIndex = new StoreIndex.Builder(famousIndex).build();
+			client.execute(storeIndex);*/
 			
 			cluster.shutdown();
 

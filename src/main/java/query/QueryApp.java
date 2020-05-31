@@ -5,15 +5,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import com.basho.riak.client.api.RiakClient;
-import com.basho.riak.client.api.commands.kv.FetchValue;
 import com.basho.riak.client.core.RiakCluster;
-import com.basho.riak.client.core.query.Location;
-import com.basho.riak.client.core.query.Namespace;
-import com.basho.riak.client.core.query.RiakObject;
-import main.java.documents.Product;
+import com.basho.riak.client.core.operations.SearchOperation;
+import com.basho.riak.client.core.util.BinaryValue;
 
 /**
  * Classe dédiée aux query, elle implémente deux query :
@@ -24,163 +25,247 @@ import main.java.documents.Product;
  */
 public class QueryApp {
 
-	private RiakCluster cluster;
 	private RiakClient client;
+	private RiakCluster cluster;
 	
-	/**
-	 * Constructor with Cluster of our database
-	 * @param rc instance of RiakCluster
-	 */
-	public QueryApp(RiakCluster cluster, RiakClient client) {
-		this.cluster = cluster;
+	public QueryApp(RiakClient client, RiakCluster cluster) {
 		this.client = client;
+		this.cluster = cluster;
+	}
+	
+	public Date[] getPeriod(String begin, String end) {
+		Date[] dates = new Date[2];
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+			dates[0] = formatter.parse(begin);
+			dates[1] = formatter.parse(end);
+		} catch (ParseException e) {
+			System.out.println("[ERROR] - Conversion impossible pour les dates suivantes: " + begin + " ; " + end);
+			return null;
+		}
+		return dates;
+	}
+	
+	public Date getDateFromString(String date) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		Date res = null;
+		try {
+			res = formatter.parse(date);
+		} catch (ParseException e) {
+			System.out.println("[ERROR] - Conversion impossible pour la date suivante: " + date);
+			return res;
+		}
+		return res;
 	}
 	
 	/**
 	 * Query 2
-	 * @param ProductName le nom du produit
+	 * @param asin l'asin du produit
 	 * @param begin la date de début au format yyyy-MM-dd
 	 * @param end la date de fin au format yyyy-MM-dd
 	 * @throws ParseException 
-	 * @throws InterruptedException 
-	 * @throws ExecutionException 
 	 */
-	public void getPeopleWithAsinAndPeriod(String asin, String begin, String end) throws ParseException {
+	public void getPeopleForAsinAndPeriod(String asin, String begin, String end) throws ParseException {
 		
-		//Les periodes
-		Date dBegin;
-		Date dEnd;
+		Date[] period = getPeriod(begin, end);
 		
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        dBegin = formatter.parse(begin);
-        dEnd = formatter.parse(end);
-		
-		// product : asin 
-		Location productLoc = new Location(new Namespace("product", asin), "asin");
-		FetchValue fetchProductLoc = new FetchValue.Builder(productLoc).build();
-		RiakObject objResponseFetchProductLoc = null;
-		
-		try {
-			
-			// On exécute
-			FetchValue.Response responseFetchProductLoc = client.execute(fetchProductLoc);		
-			// On récupère l'objet
-			objResponseFetchProductLoc = responseFetchProductLoc.getValue(RiakObject.class);
-			
-		} catch (ExecutionException | InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		if(objResponseFetchProductLoc != null) {
-			
-			Namespace invoicePersonIdSpace = new Namespace("invoice", objResponseFetchProductLoc.getValue().toString());
-			Location invoicePersonIdLoc = new Location(invoicePersonIdSpace, "personId");
-			Location invoiceOrderDateLoc = new Location(invoicePersonIdSpace, "orderDate");
-			
-			FetchValue fetchInvoicePersonIdLoc = new FetchValue.Builder(invoicePersonIdLoc).build();
-			FetchValue fetchInvoiceOrderDateLoc = new FetchValue.Builder(invoiceOrderDateLoc).build();
-			
-			List<RiakObject> objResponseFetchInvoicePersonIdLoc = null;
-			List<RiakObject> objResponseFetchInvoiceOrderDateLoc = null;
-			
+		if(period != null) {
+			// On recherche toutes les factures liées aux produits dont l'asin est spécifié
+			SearchOperation searchInvoice = new SearchOperation.Builder(BinaryValue.create("searchInvoice"), "orderLine:*asin:" + asin + "*").build();
+			cluster.execute(searchInvoice);
+			List<Map<String, List<String>>> resultsInvoice = new ArrayList<Map<String,List<String>>>();
+			List<Map<String, List<String>>> resultsInvoiceFinal = new ArrayList<Map<String,List<String>>>();
 			try {
-				
-				// On exécute
-				FetchValue.Response responseFetchInvoicePersonIdLoc = client.execute(fetchInvoicePersonIdLoc);
-				FetchValue.Response responseFetchInvoiceOrderDateLoc = client.execute(fetchInvoiceOrderDateLoc);
-				// On récupère l'objet
-				objResponseFetchInvoicePersonIdLoc = responseFetchInvoicePersonIdLoc.getValues();
-				objResponseFetchInvoiceOrderDateLoc = responseFetchInvoiceOrderDateLoc.getValues();
-				
-			} catch (ExecutionException | InterruptedException e) {
+				resultsInvoice = searchInvoice.get().getAllResults();
+			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
-			
-			if(objResponseFetchInvoicePersonIdLoc != null && objResponseFetchInvoiceOrderDateLoc != null) {
-				
-				List<RiakObject> listObjResponseFetchFeedbackFeedbackLoc = new ArrayList<RiakObject>();
-				List<RiakObject> listObjResponseFetchFeedbackPersonIdLoc = new ArrayList<RiakObject>();
-				
-				for(RiakObject ro : objResponseFetchInvoicePersonIdLoc) {
-					for(RiakObject rod : objResponseFetchInvoiceOrderDateLoc) {
-						Date dateOfRod = formatter.parse(rod.getValue().toString());
-						if(dateOfRod.before(dEnd) && dateOfRod.after(dBegin)) {
-							
-							// feedback : asin , feedback , personId
-							Namespace feedbackForAsin = new Namespace("feedback", objResponseFetchProductLoc.getValue().toString() + ro.getValue().toString());
-							Location feedbackFeedbackLoc = new Location(feedbackForAsin, "feedback");
-							Location feedbackPersonIdLoc = new Location(feedbackForAsin, "personId");
-							// Fetch
-							FetchValue fetchFeedbackFeedbackLoc = new FetchValue.Builder(feedbackFeedbackLoc).build();
-							FetchValue fetchFeedbackPersonIdLoc = new FetchValue.Builder(feedbackPersonIdLoc).build();
-							
-							RiakObject objResponseFetchFeedbackFeedbackLoc = null;
-							RiakObject objResponseFetchFeedbackPersonIdLoc = null;
-							
-							try {
-								
-								// On exécute
-								FetchValue.Response responseFetchFeedbackFeedbackLoc = client.execute(fetchFeedbackFeedbackLoc);
-								FetchValue.Response responseFetchFeedbackPersonIdLoc = client.execute(fetchFeedbackPersonIdLoc);
-								// On récupère les objets
-								objResponseFetchFeedbackFeedbackLoc = responseFetchFeedbackFeedbackLoc.getValue(RiakObject.class);
-								objResponseFetchFeedbackPersonIdLoc = responseFetchFeedbackPersonIdLoc.getValue(RiakObject.class);
-								
-								if(objResponseFetchFeedbackFeedbackLoc != null && objResponseFetchFeedbackPersonIdLoc != null) {
-									listObjResponseFetchFeedbackFeedbackLoc.add(objResponseFetchFeedbackFeedbackLoc);
-									listObjResponseFetchFeedbackPersonIdLoc.add(objResponseFetchFeedbackPersonIdLoc);
-								} else {
-									System.out.println("[QUERY2] - Feedback : aucun feedback trouvé !");
-								}
-								
-							} catch (ExecutionException | InterruptedException e) {
-								e.printStackTrace();
-							}
-							
-						}
+			if(!resultsInvoice.isEmpty()) {
+				for(Map<String, List<String>> list : resultsInvoice) {
+					String date = list.get("orderDate").get(0);
+					// Si notre date est incluse dans la période souhaitée
+					if(getDateFromString(date).after(period[0]) && getDateFromString(date).before(period[1])) {
+						resultsInvoiceFinal.add(list);
 					}
 				}
-				
-				// On parcours nos listes pour relever les personnes qui ont commentés
-				if(!listObjResponseFetchFeedbackFeedbackLoc.isEmpty() && !listObjResponseFetchFeedbackPersonIdLoc.isEmpty()) {
-					
-					for(RiakObject ro : listObjResponseFetchFeedbackPersonIdLoc) {
-						
-						Namespace personSpace = new Namespace("person", ro.getValue().toString());
-						Location personIdLoc = new Location(personSpace, "id");
-						Location personFirstNameLoc = new Location(personSpace, "firstName");
-						Location personLastNameLoc = new Location(personSpace, "lastName");
-						// Fetch
-						FetchValue fetchPersonIdLoc = new FetchValue.Builder(personIdLoc).build();
-						FetchValue fetchPersonFirstNameLoc = new FetchValue.Builder(personFirstNameLoc).build();
-						FetchValue fetchPersonLastNameLoc = new FetchValue.Builder(personLastNameLoc).build();
-						
-						try {
-							
-							FetchValue.Response responseFetchPersonIdLoc = client.execute(fetchPersonIdLoc);
-							FetchValue.Response responseFetchPersonFirstNameLoc = client.execute(fetchPersonFirstNameLoc);
-							FetchValue.Response responseFetchPersonLastNameLoc = client.execute(fetchPersonLastNameLoc);
-							
-							// LES RESULTATS
-							System.out.println("[RES] - person {id: " + responseFetchPersonIdLoc.getValue(RiakObject.class).getValue().toString() +
-												"; firstName: " + responseFetchPersonFirstNameLoc.getValue(RiakObject.class).getValue().toString() +
-												"; lastName: " + responseFetchPersonLastNameLoc.getValue(RiakObject.class).getValue().toString());
-							
-						} catch (ExecutionException | InterruptedException e) {
-							e.printStackTrace();
+				// Maintenant que nous avons affiné la liste, on peut chercher les individus liés à l'achat de celui-ci
+				for(Map<String, List<String>> list : resultsInvoiceFinal) {
+					String personId = list.get("personId").get(0);
+					// On cherche pour ces individus, leur nom et prénom
+					SearchOperation searchPerson = new SearchOperation.Builder(BinaryValue.create("searchPerson"), "personId:" + personId).build();
+					cluster.execute(searchPerson);
+					List<Map<String, List<String>>> resultsPerson = new ArrayList<Map<String,List<String>>>();
+					try {
+						resultsPerson = searchPerson.get().getAllResults();
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
+					}
+					if(!resultsPerson.isEmpty()) {
+						List<Map<String, List<String>>> resultsPersonFinal = new ArrayList<Map<String,List<String>>>();
+						for(Map<String, List<String>> l : resultsPerson) {
+							//Est-ce que ces personnes ont émis un feedback de ce produit ?
+							String id = l.get("personId").get(0);
+							String firstName = l.get("firstName").get(0);
+							String lastName = l.get("lastName").get(0);
+							SearchOperation searchFeedback = new SearchOperation.Builder(BinaryValue.create("searchFeedback"), "personId:" + personId).build();
+							cluster.execute(searchFeedback);
+							List<Map<String, List<String>>> resultsFeedback = new ArrayList<Map<String,List<String>>>();
+							try {
+								resultsFeedback = searchFeedback.get().getAllResults();
+							} catch (InterruptedException | ExecutionException e) {
+								e.printStackTrace();
+							}
+							// Si la liste est non vide, cela signifie que la personne a commenté à propos de ce produit
+							if(!resultsFeedback.isEmpty()) {
+								// On retourne le résultat
+								System.out.println("[RESULTAT] : id: " + id + "; firstName: " + firstName + "; LastName: " + lastName);
+							} 
 						}
-						
-					}	
-					
+					} else {
+						System.out.println("[INFO] - aucune personne n'a acheté le produit: " + asin);
+					}
 				}
-				
 			} else {
-				System.out.println("[QUERY2] - Feedback : introuvable avec les parametres suivants : " + asin + "; begin: " + begin + "; end: " + end);
+				System.out.println("[INFO] - aucun produit trouvé pour l'asin: " + asin);
 			}
-			
 		} else {
-			System.out.println("[QUERY2] - Product : produit introuvable pour l'asin : " + asin);
+			System.out.println("[ERROR] - format de la période entrée invalide, fin du traitement");
 		}
 
 	}
+	
+	/**
+	 * Query 8
+	 * @param category catégorie du vendeur (ex: "clothing", "ice_hockey", "sportswear", etc...)
+	 * @param year l'année à étudier
+	 */
+	public void getTotalSalesAndPopularityOfProduct(String category, String year) {
+		
+		JSONParser parser = new JSONParser();
+		
+		try {
+			
+			int date = Integer.parseInt(year);
+			System.out.println(date);
+			String key = "";
+			//Les totaux des ventes
+			int totalVente = 0;
+			// Notre liste des produits concernés
+			List<Map<String, List<String>>> resultsInvoiceToInclude = new ArrayList<Map<String,List<String>>>();
+			
+			
+			// Tout d'abord, on recherche parmis tout les vendeurs leur catégorie (ex: dans "vendor" il est renseigné dans les parenthèses)
+			SearchOperation searchVendor = new SearchOperation.Builder(BinaryValue.create("searchVendor"), "vendor:*" + category + "*").build();
+			cluster.execute(searchVendor);
+			List<Map<String, List<String>>> resultsVendor = new ArrayList<Map<String,List<String>>>();
+			try {
+				resultsVendor = searchVendor.get().getAllResults();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+			
+			// On récupère les clés primaires obtenues
+			Map<String, List<String>> doc = resultsVendor.get(0);
+			if(!resultsVendor.isEmpty()) {
+				for(Map<String, List<String>> res : resultsVendor) {
+					// On récupère les clés de chaque vendeur
+					key = res.get("_yz_rk").get(0);
+					// Avec ces clés, on fait la jointure avec Product.brand
+					SearchOperation searchProduct = new SearchOperation.Builder(BinaryValue.create("searchProduct"), "brand:" + key).build();
+					cluster.execute(searchProduct);
+					List<Map<String, List<String>>> resultsProduct = new ArrayList<Map<String,List<String>>>();
+					try {
+						resultsProduct = searchProduct.get().getAllResults();
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
+					}
+					if(!resultsProduct.isEmpty()) {
+						for(Map<String, List<String>> res1 : resultsProduct) {
+							// On récupère les clés de chaque produit
+							key = res1.get("_yz_rk").get(0);
+							// Avec ces clés, on fait la jointure avec Invoice.asin
+							SearchOperation searchInvoice = new SearchOperation.Builder(BinaryValue.create("searchInvoice"), "orderLine:*asin:" + key + "*").build();
+							cluster.execute(searchInvoice);
+							List<Map<String, List<String>>> resultsInvoice = new ArrayList<Map<String,List<String>>>();
+							try {
+								resultsInvoice = searchInvoice.get().getAllResults();
+							} catch (InterruptedException | ExecutionException e) {
+								e.printStackTrace();
+							}
+							if(!resultsInvoice.isEmpty()) {
+								
+								for(Map<String, List<String>> res2 : resultsInvoice) {
+									// On récupère l'année
+									int yearOfInvoice = Integer.parseInt(res2.get("orderDate").get(0));
+									// Si elle est incluse dans la période que l'on souhaite étudier
+									if(date == yearOfInvoice) {
+										resultsInvoiceToInclude.add(res2);
+									}
+								}
+								// De notre liste affiné, on récupère les totaux des prix
+								// On défini notre compteur
+								for(Map<String, List<String>> list : resultsInvoiceToInclude) {
+									
+									String toCast = list.get("orderLine").get(0);
+									JSONObject json = new JSONObject();
+									try {
+										json = (JSONObject) parser.parse(toCast);
+										totalVente += Integer.parseInt(json.get("asin").toString());
+									} catch (org.json.simple.parser.ParseException e) {
+										System.out.println("[WARN] - erreur format json > input: " + toCast);
+									}
+
+								}
+								
+							} else {
+								System.out.println("[INFO] - aucune facture trouvé pour la catégorie: " + category);
+							}
+						}
+					} else {
+						System.out.println("[INFO] - aucun produit trouvé pour la catégorie: " + category);
+					}
+				}
+				//Après avoir récupéré tout les produits vendus (totaux) pour l'année étudiée et la catégorie spécifiée, on recherche les commentaires associés aux ventes
+				System.out.println("[TOTAUX DES VENTES : CATEGORIE -> "+ category +"] = " + totalVente);
+				System.out.println("[FEEDBACK] -> \n --- BEGIN ---");
+				for(Map<String, List<String>> list : resultsInvoiceToInclude) {
+					// On récupère les produits liés aux factures
+					String toCast = list.get("orderLine").get(0);
+					JSONObject json = new JSONObject();
+					try {
+						json = (JSONObject) parser.parse(toCast);
+						String asin = json.get("asin").toString();
+						// On récupère les feedback en fonction des asin récupérés
+						SearchOperation searchFeedback = new SearchOperation.Builder(BinaryValue.create("searchFeedback"), "asin:" + asin).build();
+						cluster.execute(searchFeedback);
+						List<Map<String, List<String>>> resultsFeedback = new ArrayList<Map<String,List<String>>>();
+						try {
+							resultsFeedback = searchFeedback.get().getAllResults();
+						} catch (InterruptedException | ExecutionException e) {
+							e.printStackTrace();
+						}
+						if(!resultsFeedback.isEmpty()) {
+							for(Map<String, List<String>> l : resultsFeedback) {
+								String feedback = l.get("feedback").get(0);
+								System.out.println(asin + " > " + feedback);
+							}
+							// Fin du programme
+							System.out.println(" --- END ---");
+						} else {
+							System.out.println("> Aucun feedback trouvé concernant les produits trouvés \n --- END ---");
+						}
+					} catch (org.json.simple.parser.ParseException e) {
+						System.out.println("[WARN] - erreur format json > input: " + toCast);
+					}
+				}
+				
+			} else {
+				System.out.println("[INFO] - aucun vendeur trouvé pour la catégorie: " + category);
+			}
+			
+		} catch(NumberFormatException e) {
+			System.out.println("[WARN]  - Date invalide, arret du traitement");
+		}
+	}
+	
 }
