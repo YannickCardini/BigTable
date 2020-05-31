@@ -30,6 +30,7 @@ public class Xml {
 	}
 
 	public ArrayList<Order> getInvoices() {
+		System.out.println(invoices.size());
 		return invoices;
 	}
 
@@ -70,6 +71,9 @@ public class Xml {
 					
 					String orderLine = eElement.getElementsByTagName("Orderline").item(0).getTextContent();
 					inv.setOrderLine(orderLine);
+					
+					invoices.add(inv);
+
 				}
 			}
 			
@@ -103,7 +107,6 @@ public class Xml {
 //
 //					}
 //					inv.setOrderline(getDocs());
-//					invoices.add(inv);
 //				}
 //			}
 		} catch (Exception e) {

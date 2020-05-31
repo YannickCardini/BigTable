@@ -5,12 +5,15 @@ import com.basho.riak.client.api.cap.Quorum;
 import com.basho.riak.client.api.commands.kv.FetchValue;
 import com.basho.riak.client.api.commands.kv.StoreValue;
 import com.basho.riak.client.api.commands.kv.UpdateValue;
+import com.basho.riak.client.api.commands.search.StoreIndex;
 import com.basho.riak.client.core.RiakCluster;
 import com.basho.riak.client.core.RiakNode;
 import com.basho.riak.client.core.netty.RiakResponseException;
+import com.basho.riak.client.core.operations.SearchOperation;
 import com.basho.riak.client.core.query.Location;
 import com.basho.riak.client.core.query.Namespace;
 import com.basho.riak.client.core.query.RiakObject;
+import com.basho.riak.client.core.query.search.YokozunaIndex;
 import com.basho.riak.client.core.util.BinaryValue;
 import main.java.documents.*;
 import main.java.read.Csv;
@@ -22,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.basho.riak.client.*;
@@ -44,7 +49,7 @@ public class TasteOfRiak {
 	private static RiakCluster setUpCluster() throws UnknownHostException {
 
 		// This example will use only one node listening on localhost:10017
-		RiakNode node = new RiakNode.Builder().withRemoteAddress("18.220.122.237").build();
+		RiakNode node = new RiakNode.Builder().withRemoteAddress("127.0.0.1").withRemotePort(8087).build();
 
 		// This cluster object takes our one node as an argument
 		RiakCluster cluster = new RiakCluster.Builder(node).build();
@@ -304,6 +309,7 @@ public class TasteOfRiak {
 				}
 			}
 
+
 			if (vend.getIndustry() != null && vend.getIndustry().length() > 0) {
 				vendorLocation = new Location(bucket, "industry");
 				ro = new RiakObject();
@@ -370,7 +376,7 @@ public class TasteOfRiak {
 			}
 			
 			if (inv.getOrderLine() != null && inv.getOrderLine().length() > 0) {
-				vendorLocation = new Location(bucket, "totalPrice");
+				vendorLocation = new Location(bucket, "orderLine");
 				ro = new RiakObject();
 				ro.setValue(BinaryValue.create(inv.getOrderLine()));
 				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
@@ -436,7 +442,7 @@ public class TasteOfRiak {
 			}
 			
 			if (ord.getOrderLine() != null && ord.getOrderLine().length() > 0) {
-				vendorLocation = new Location(bucket, "totalPrice");
+				vendorLocation = new Location(bucket, "orderLine");
 				ro = new RiakObject();
 				ro.setValue(BinaryValue.create(ord.getOrderLine()));
 				storeOp = new StoreValue.Builder(ro).withLocation(vendorLocation).build();
@@ -458,16 +464,44 @@ public class TasteOfRiak {
 			RiakCluster cluster = setUpCluster();
 			RiakClient client = new RiakClient(cluster);
 			System.out.println("Client object successfully created");
+//			
+//			Json json = new Json();
+//			json.fillRiakWithJsonFile(PATH + "tmp.json", client);
 
 			/////////////////////////// Alimente la BDD, extremement long et a usage
 			/////////////////////////// unique///////////////////////
-			 storePerson(PATH + "Customer/person_0_0.csv",client); //
-			 storeFeedback(PATH + "Feedback/Feedback.csv",client); //
-//			storeProduct(PATH + "Product/Product.csv", PATH + "Product/BrandByProduct.csv", client); //
-			// storeVendor(PATH + "Vendor/Vendor.csv",client); //
-			// storeInvoice(PATH + "Invoice/Invoice.xml", client); //
-			// storeOrder(PATH + "Order/Order.json", client); //
-			//////////////////////////////////////////////////////////////////////////////////////////////////////
+//			 storePerson(PATH + "Customer/person_0_0.csv",client); //
+//			 storeFeedback(PATH + "Feedback/Feedback.csv",client); //
+//			 storeProduct(PATH + "Product/Product.csv", PATH + "Product/BrandByProduct.csv", client); //
+//			 storeVendor(PATH + "Vendor/Vendor.csv",client); //
+//			 storeInvoice(PATH + "Invoice/Invoice.xml", client); //
+//			 storeOrder(PATH + "Order/Order.json", client); //
+			////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			// Alimentation
+//			Namespace animalsBucket = new Namespace("order");
+//			String json = "application/json";
+//
+//			RiakObject liono = new RiakObject()
+//			        .setContentType(json)
+//			        .setValue(BinaryValue.create("{\"OrderId\":\"oui\",\"age_i\":30,\"leader_b\":true}"));
+//			Location lionoLoc = new Location(animalsBucket, "liono");
+//
+//			StoreValue lionoStore = new StoreValue.Builder(liono).withLocation(lionoLoc).build();
+//			// The other StoreValue operations can be built the same way
+//
+//			client.execute(lionoStore);
+//			
+			// Search
+			SearchOperation searchOp = new SearchOperation
+			        .Builder(BinaryValue.create("searchOrder"), "*:*")
+			        .build();
+			cluster.execute(searchOp);
+			// This will display the actual results as a List of Maps:
+			List<Map<String, List<String>>> results = searchOp.get().getAllResults();
+			// This will display the number of results:
+			System.out.println(results);
+			
 
 			cluster.shutdown();
 
