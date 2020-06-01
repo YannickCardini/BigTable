@@ -20,8 +20,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="191ca292-0fb3-46cd-b904-0dac7740cfe0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/read/Json.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/read/Json.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/read/Xml.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/read/Xml.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/setup/TasteOfRiak.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/setup/TasteOfRiak.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/util/ToolBox.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/BigTable-0.0.1-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/BigTable-0.0.1-SNAPSHOT.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
@@ -100,6 +104,14 @@
       <screen x="67" y="27" width="885" height="939" />
     </state>
     <state x="302" y="271" width="424" height="484" key="FileChooserDialogImpl/67.27.885.939@67.27.885.939" timestamp="1591020311612" />
+    <state x="395" y="106" width="1482" height="788" key="MergeDialog" timestamp="1591027514711">
+      <screen x="67" y="27" width="1853" height="948" />
+    </state>
+    <state x="395" y="106" width="1482" height="788" key="MergeDialog/67.27.1853.948@67.27.1853.948" timestamp="1591027514711" />
+    <state x="867" y="363" width="547" height="274" key="MultipleFileMergeDialog" timestamp="1591027514734">
+      <screen x="67" y="27" width="1853" height="948" />
+    </state>
+    <state x="867" y="363" width="547" height="274" key="MultipleFileMergeDialog/67.27.1853.948@67.27.1853.948" timestamp="1591027514734" />
     <state x="657" y="227" key="run.anything.popup" timestamp="1591024554199">
       <screen x="67" y="27" width="1853" height="948" />
     </state>

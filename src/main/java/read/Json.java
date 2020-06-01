@@ -1,9 +1,8 @@
 package main.java.read;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -43,16 +42,15 @@ public class Json {
 //			orderlines.add(doc);
 		}
 	}
-	
+
 	Order parseOrderFromJson(JSONObject obj) throws java.text.ParseException {
 //		SimpleDateFormat formatOrder = new SimpleDateFormat("yyyy-MM-dd");
 		Order ord = new Order();
 		ord.setOrderId((String)obj.get("OrderId"));
 		ord.setPersonId((String)obj.get("PersonId"));
 		ord.setOrderDate((String)obj.get("OrderDate"));
-		ord.setTotalPrice((String)obj.get("TotalPrice"));
-		ord.setOrderDate((String)obj.get("Orderline"));
-//		parseOrderlineFromOrder((JSONArray)obj.get("Orderline"));
+		ord.setTotalPrice(String.valueOf(obj.get("TotalPrice")));
+		parseOrderlineFromOrder((JSONArray)obj.get("Orderline"));
 		return ord;
 	}
 
@@ -81,6 +79,5 @@ public class Json {
 			e.printStackTrace();
 		}
 	}
-
 
 }
