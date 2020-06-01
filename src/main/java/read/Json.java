@@ -99,9 +99,7 @@ public class Json {
 
 			while ((line = bufferedReader.readLine()) != null) {
 				obj = (JSONObject) new JSONParser().parse(line);
-				System.out.println(obj);
-				break;
-//				orders.add(parseOrderFromJson(obj));
+				orders.add(parseOrderFromJson(obj));
 			}
 			// Always close files.
 			bufferedReader.close();

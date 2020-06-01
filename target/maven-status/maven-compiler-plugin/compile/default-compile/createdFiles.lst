@@ -4,6 +4,7 @@ main\java\documents\Order.class
 main\java\documents\Product.class
 main\java\read\Json.class
 main\java\read\Xml.class
+main\java\setup\Resolver.class
 main\java\setup\TasteOfRiak.class
 main\java\documents\Person.class
 main\java\documents\Doc.class
