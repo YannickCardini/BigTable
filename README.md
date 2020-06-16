@@ -1,4 +1,4 @@
-# BigTable
+# RIAK KV
 Projet BDD sur la base de donnée NoSQL RIAK KV
 
 ## Prérequis
